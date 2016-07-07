@@ -14,6 +14,7 @@ router.post('/callback', (req, res) => {
   
     sendMessage(data.from, data.text);
   }
+  res.send(200);
 });
 
 function sendMessage(sender, text) {
