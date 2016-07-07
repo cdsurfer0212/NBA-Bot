@@ -33,9 +33,9 @@ function sendMessage(sender, text) {
     body: JSON.stringify(data),
     headers: {
       'Content-type': 'application/json; charset=UTF-8',
-      'X-Line-ChannelID': CHANNEL_ID,
-      'X-Line-ChannelSecret': CHANNEL_SERECT,
-      'X-Line-Trusted-User-With-ACL': MID
+      'X-Line-ChannelID': process.env.CHANNEL_ID,
+      'X-Line-ChannelSecret': process.env.CHANNEL_SERECT,
+      'X-Line-Trusted-User-With-ACL': process.env.MID
     },
     method: 'POST',
     url: 'https://trialbot-api.line.me/v1/events'
