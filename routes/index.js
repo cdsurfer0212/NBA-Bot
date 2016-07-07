@@ -1,4 +1,5 @@
 var express = require('express');
+var request = require('request');
 var router = express.Router();
 
 /* GET home page. */
@@ -7,7 +8,6 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/callback', (req, res) => {
-  res.send(200);
   const result = req.body.result;
   for (let i = 0; i < result.length; i++) {
     const data = result[i]['content'];
@@ -15,6 +15,7 @@ router.post('/callback', (req, res) => {
   
     sendMessage(data.from, data.text);
   }
+  res.send(200);
 });
 
 function sendMessage(sender, text) {
