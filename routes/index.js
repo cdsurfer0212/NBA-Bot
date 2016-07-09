@@ -1,5 +1,4 @@
 var express = require('express');
-var request = require('request');
 var router = express.Router();
 
 /* GET home page. */
@@ -12,43 +11,68 @@ router.post('/callback', (req, res) => {
   for (let i = 0; i < result.length; i++) {
     const data = result[i]['content'];
     console.log('receive: ', data);
-  
-    sendMessage(data.from, data.text);
+
+    //sendMessage(data.from, data.text);
+    var wit = require('../wit.js');
+    var sessions = wit.sessions;
+
+    const findOrCreateSession = (lineId) => {
+      let sessionId;
+
+      Object.keys(sessions).forEach(k => {
+        if (sessions[k].lineId === lineId) {
+          sessionId = k;
+        }
+      });
+
+      if (!sessionId) {
+        //sessionId = new Date().toISOString();
+        sessionId = new Date().getTime().toString();
+        sessions[sessionId] = {lineId: lineId, context: {}};
+      }
+      return sessionId;
+    };
+
+    var sessionId = findOrCreateSession(data.from);
+    wit.runActions(sessionId, data.text, sessions[sessionId].context).then((context) => {
+      sessions[sessionId].context = context;
+    }).catch((err) => {
+      console.error(err || err.stack);
+    });
   }
-  res.send(200);
+
+  res.sendStatus(200);
 });
 
-function sendMessage(sender, text) {
-  const data = {
-    to: [sender],
-    toChannel: 1383378250,
-    eventType: '138311608800106203',
-    content: {
-      contentType: 1,
-      toType: 1,
-      text: text
+router.get('/test', (req, res) => {
+  var wit = require('../wit.js');
+  var sessions = wit.sessions;
+
+  const findOrCreateSession = (lineId) => {
+    let sessionId;
+
+    Object.keys(sessions).forEach(k => {
+      if (sessions[k].lineId === lineId) {
+        sessionId = k;
+      }
+    });
+
+    if (!sessionId) {
+      //sessionId = new Date().toISOString();
+      sessionId = new Date().getTime().toString();
+      sessions[sessionId] = {lineId: lineId, context: {}};
     }
+    return sessionId;
   };
-  console.log('send: ', data);
 
-  request({
-    body: JSON.stringify(data),
-    headers: {
-      'Content-type': 'application/json; charset=UTF-8',
-      'X-Line-ChannelID': process.env.CHANNEL_ID,
-      'X-Line-ChannelSecret': process.env.CHANNEL_SERECT,
-      'X-Line-Trusted-User-With-ACL': process.env.MID
-    },
-    method: 'POST',
-    url: 'https://trialbot-api.line.me/v1/events'
-
-  }, function(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      console.log(body);
-    } else {
-      console.log(error);
-    }
+  var sessionId = findOrCreateSession('abc');
+  wit.runActions(sessionId, req.query.text, sessions[sessionId].context).then((context) => {
+    sessions[sessionId].context = context;
+  }).catch((err) => {
+    console.error(err || err.stack);
   });
-}
+  
+  res.sendStatus(200);
+});
 
 module.exports = router;
