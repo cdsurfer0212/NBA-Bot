@@ -3,7 +3,6 @@
 let Wit = require('node-wit').Wit;
 
 const accessToken = (() => {
-  process.env.WIT_TOKEN = 'WNYT3ADXZ6MFTLGREDL3EV67K2Y45YD7';
   return process.env.WIT_TOKEN;
 })();
 
